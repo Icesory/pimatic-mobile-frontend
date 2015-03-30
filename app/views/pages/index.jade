@@ -84,6 +84,7 @@ script#timer-template(type='text/template')
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon(data-bind="jqmbutton: {icon: $data.startButtonIcon}, click: $data.toggleRunning")
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-refresh(data-bind="click: function(){$data.sendTimerAction('resetTimer');}")=__('Reset')
 script#attribute-template(type='text/template')
+  <!-- ko if: $data.shouldDisplayAttribute() -->
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
     span.acronym(data-bind="text: $data.displayAcronym()")
     span.val(data-bind="text: $data.displayValueText()")
@@ -91,6 +92,7 @@ script#attribute-template(type='text/template')
     <!-- ko if: $data.shouldDisplaySparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
+  <!-- /ko -->
 script#switch-attribute-template(type='text/template')
   <!-- ko if: $data.type !== 'boolean' -->
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")

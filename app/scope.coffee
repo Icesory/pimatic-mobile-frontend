@@ -55,6 +55,7 @@ class DeviceAttribute
     displaySparkline: 'observe'
     displayUnit: 'copy'
     discrete: 'copy'
+    showOnGui: 'observe'
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
@@ -131,6 +132,11 @@ class DeviceAttribute
 
   displayAcronym: ->
     return @acronym or ''
+
+  shouldDisplayAttribute: ->
+    #unless @showOnGui? then return true
+    return @showOnGui or true
+
 
   formatValue: (value) ->
     switch @type
