@@ -1190,6 +1190,7 @@ li.item .attributes .sparkline canvas{
   max-width: 40px !important;
   position: relative;
   top: 2px;
+  vertical-align: middle !important;
 }
 
 @media (min-width: 28em) {
@@ -1350,6 +1351,19 @@ html head + body.flat .ui-btn.ui-btn-a {
 .flat .ui-btn-icon-right:after {
   top: 50%;
   margin-top: -11px;
+}
+
+.ui-icon-alone-position{
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0;
+  width: 1em;
+  height: 1em;
+}
+
+.ui-icon-alone-nodisc:after{
+  background-color: transparent;
 }
 
 .flat .ui-bar-a, .ui-page-theme-a .ui-bar-inherit, 

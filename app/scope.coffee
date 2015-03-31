@@ -39,6 +39,32 @@ setupUnitPrefixes = ( ->
   }
 )()
 
+#class Icon
+#  @mapping = {
+#    $default: 'ignore'
+#    name: "copy"
+#    iconSVG: "copy"
+#    iconClassName: "copy"
+#    showIcon: "observe"
+#  }
+#  constructor: (data, @device) ->
+#    console.log "creating Icon", data
+#    ko.mapper.fromJS(data, @constructor.mapping, this)
+#
+#  getIconSVG: ->
+#    return @iconSVG or  ''
+#
+# shouldDisplayIcon: ->
+#   return @showIcon or true
+# getIcon: ->
+#   #if @iconClassName? and @iconClassName isnt ''
+#   return @iconClassName
+#   #else
+#   #return a construct from the iconSVG to fit as css class
+# update: (data) -> 
+#   ko.mapper.fromJS(data, @constructor.mapping, this)
+
+
 class DeviceAttribute 
   @mapping = {
     $default: 'ignore'
@@ -56,6 +82,8 @@ class DeviceAttribute
     displayUnit: 'copy'
     discrete: 'copy'
     showOnGui: 'observe'
+    iconClassName: 'observe'
+    showIcon: 'observe'
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
@@ -77,6 +105,12 @@ class DeviceAttribute
       @history().length > 1 and 
       (if @displaySparkline? and @displaySparkline()? then @displaySparkline() else true)
     )
+
+  shouldDisplayIcon: ->
+    return @showIcon() or false
+
+  getIcon: ->
+    return @iconClassName() or ""
 
   tooltipHtml: => 
     @label + ': ' +
@@ -135,7 +169,7 @@ class DeviceAttribute
 
   shouldDisplayAttribute: ->
     #unless @showOnGui? then return true
-    return @showOnGui or true
+    return @showOnGui() or true
 
 
   formatValue: (value) ->
