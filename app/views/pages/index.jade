@@ -83,10 +83,10 @@ script#timer-template(type='text/template')
       span.controls-inner
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon(data-bind="jqmbutton: {icon: $data.startButtonIcon}, click: $data.toggleRunning")
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-refresh(data-bind="click: function(){$data.sendTimerAction('resetTimer');}")=__('Reset')
-//-script#icon-template(type='text/template')
+script#icon-template(type='text/template')
   <!-- ko if: $data.shouldDisplayIcon() -->
   span.icon-container
-    span.ui-icon-alone-position.ui-icon-alone-nodisc.ui-btn-icon-notext.ui-icon(data-bind="icon: $data.getIcon")
+    span.ui-icon-alone-position.ui-icon-alone-nodisc.ui-btn-icon-notext.ui-icon(data-bind="css: $data.getIconCSS")
   <!-- /ko -->
 script#attribute-template(type='text/template')
   <!-- ko if: $data.shouldDisplayAttribute() -->
@@ -100,7 +100,7 @@ script#attribute-template(type='text/template')
   <!-- /ko -->
   <!-- ko if: $data.shouldDisplayIcon() -->
   span.icon-container
-    span.ui-icon-alone-position.ui-icon-alone-nodisc.ui-btn-icon-notext.ui-icon(data-bind="icon: $data.getIcon")
+    span.ui-icon-alone-position.ui-icon-alone-nodisc.ui-btn-icon-notext(data-bind="css: $data.getIconCSS()")
   <!-- /ko -->
 script#switch-attribute-template(type='text/template')
   <!-- ko if: $data.type !== 'boolean' -->

@@ -39,30 +39,48 @@ setupUnitPrefixes = ( ->
   }
 )()
 
-#class Icon
-#  @mapping = {
-#    $default: 'ignore'
-#    name: "copy"
-#    iconSVG: "copy"
-#    iconClassName: "copy"
-#    showIcon: "observe"
-#  }
-#  constructor: (data, @device) ->
-#    console.log "creating Icon", data
-#    ko.mapper.fromJS(data, @constructor.mapping, this)
-#
-#  getIconSVG: ->
-#    return @iconSVG or  ''
-#
-# shouldDisplayIcon: ->
-#   return @showIcon or true
-# getIcon: ->
-#   #if @iconClassName? and @iconClassName isnt ''
-#   return @iconClassName
-#   #else
-#   #return a construct from the iconSVG to fit as css class
-# update: (data) -> 
-#   ko.mapper.fromJS(data, @constructor.mapping, this)
+class Icon
+  @mapping = {
+    $default: 'ignore'
+    name: "copy"
+    iconClassNames: "copy"
+    activeIcon: "observe"
+    showIcon: "observe"
+    lastIconBlink: "copy"
+    topValue: "copy"
+    bottomValue: "copy"
+  }
+  constructor: (data, @attribute) ->
+    console.log "creating Icon", data
+    ko.mapper.fromJS(data, @constructor.mapping, this)
+    _calcActiveIcon()
+
+  shouldDisplayIcon0: ->
+    return (if @showIcon? and @showIcon()? then @showIcon() else false)
+
+  getIcon0: ->
+    return (if @activeIcon? and @activeIcon()? then @activeIcon() else "")
+
+  _getIcon: (number)->
+    return (if @iconClassNames(number)? then @iconClassNames(number) else "")
+
+  _calcActiveIcon: ->
+    if @attribute.type is "boolean"
+      @activeIcon = (if @attribute.value then _getIcon(1) else _getIcon(0))
+    else if @attribute.type is "number"
+      numOfIcons = @iconClassNames.length
+      diff = topValue - bottomValue
+      steps = diff / (numOfIcons-1)
+      value = @attribute.value
+      pos = @bottomValue
+      i = 0
+      while pos < value and pos <= @topValue and i <= numOfIcons
+        pos += steps
+        i++
+      @activeIcon = _getIcon(i)
+
+ update: (data) -> 
+   ko.mapper.fromJS(data, @constructor.mapping, this)
 
 
 class DeviceAttribute 
@@ -82,11 +100,23 @@ class DeviceAttribute
     displayUnit: 'copy'
     discrete: 'copy'
     showOnGui: 'observe'
-    iconClassName: 'observe'
-    showIcon: 'observe'
+    #iconClassName: 'observe'
+    #showIcon: 'observe'
+    #icon: 
+    #  $key: 'name'
+    #  $itemOptions:
+    #    $handler: 'callback'
+    #    $create: (data) -> new Icon(data, this)
+    #    $update: (data, target) -> target.update(data); target
+    iconClassNames: "copy"
+    activeIcon: "observe"
+    showIcon: "observe"
+    lastIconBlink: "copy"
+    topValue: "copy"
+    bottomValue: "copy"
   }
   constructor: (data, @device) ->
-    #console.log "creating device attribute", data
+    console.log "creating device attribute", data
     # Allways create an observable for value:
     unless data.value? then data.value = null
 
@@ -98,6 +128,34 @@ class DeviceAttribute
     @unitText = if @unit? then @unit else ''
     if @type is "number"
       @sparklineHistory = ko.pureComputed( => ([t, v] for {t,v} in @history()) )
+    @_calcActiveIcon()
+
+  # for test
+  shouldDisplayIcon: ->
+    return (if @showIcon? and @showIcon()? then @showIcon() else false)
+
+  getIconCSS: ->
+    return (if @activeIcon? and @activeIcon()? then @activeIcon() else "")
+
+  _getIcon: (number)->
+    return (if @iconClassNames[number]? then @iconClassNames[number] else "")
+
+  _calcActiveIcon: ->
+    if !@iconClassNames? then return
+    if @type is "boolean"
+      @activeIcon = (if @value then @_getIcon(1) else @_getIcon(0))
+    else if @type is "number"
+      numOfIcons = @iconClassNames.length
+      diff = @topValue - @bottomValue
+      steps = diff / (numOfIcons-1)
+      value = @attribute.value
+      pos = @bottomValue
+      i = 0
+      while pos < value and pos <= @topValue and i <= numOfIcons
+        pos += steps
+        i++
+      @activeIcon = @_getIcon(i)
+  #
 
   shouldDisplaySparkline: -> 
     return (
@@ -106,11 +164,13 @@ class DeviceAttribute
       (if @displaySparkline? and @displaySparkline()? then @displaySparkline() else true)
     )
 
-  shouldDisplayIcon: ->
-    return @showIcon() or false
+  #shouldDisplayIcon: ->
+  #  #return (if @showIcon? and @showIcon()? then @showIcon() else false)
+  #  return @icon.getIcon0()
 
-  getIcon: ->
-    return @iconClassName() or ""
+  #getIconCSS: ->
+  #  #return (if @iconClassName? and @iconClassName()? then @iconClassName() else "")
+  #  return @icon.shouldDisplayIcon0()
 
   tooltipHtml: => 
     @label + ': ' +
@@ -138,6 +198,7 @@ class DeviceAttribute
 
   update: (data) -> 
     ko.mapper.fromJS(data, @constructor.mapping, this)
+    @_calcActiveIcon()
 
   updateValue: (timestamp, value) ->
     @value(value)
@@ -145,6 +206,7 @@ class DeviceAttribute
     if @history().length is 30
       @history.shift()
     @history.push({t:timestamp, v:value})
+    @_calcActiveIcon()
 
   displayValueText: ->
     value = @value()
@@ -168,9 +230,7 @@ class DeviceAttribute
     return @acronym or ''
 
   shouldDisplayAttribute: ->
-    #unless @showOnGui? then return true
-    return @showOnGui() or true
-
+    return (if @showOnGui? and @showOnGui()? then @showOnGui() else true)
 
   formatValue: (value) ->
     switch @type
@@ -248,7 +308,6 @@ class Device
         $handler: 'callback'
         $create: (data) -> new DeviceAttribute(data, Device.mapping.device)
         $update: (data, target) -> target.update(data); target
-
   }
   constructor: (data) ->
     Device.mapping.device = this
