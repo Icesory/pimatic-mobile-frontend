@@ -128,33 +128,41 @@ class DeviceAttribute
     @unitText = if @unit? then @unit else ''
     if @type is "number"
       @sparklineHistory = ko.pureComputed( => ([t, v] for {t,v} in @history()) )
-    @_calcActiveIcon()
 
   # for test
   shouldDisplayIcon: ->
     return (if @showIcon? and @showIcon()? then @showIcon() else false)
 
   getIconCSS: ->
-    return (if @activeIcon? and @activeIcon()? then @activeIcon() else "")
+    #return (if @activeIcon? and @activeIcon()? then @activeIcon() else "")
+    if !@iconClassNames? then return (if @activeIcon? and @activeIcon()? then @activeIcon() else "")
+    if @type is "boolean"
+      console.log("Icon type is boolean")
+      return (if @value then @_getIcon(1) else @_getIcon(0))
+    else if @type is "number"
+      console.log("Icon type is number")
+      numOfIcons = @iconClassNames.length
+      console.log("numOfIcons: #{numOfIcons}")
+      diff = @topValue - @bottomValue
+      console.log("diff: #{diff}")
+      steps = diff / (numOfIcons-1)
+      console.log("steps: #{steps}")
+      pos = @bottomValue
+      console.log("pos: #{pos}")
+      i = 0
+      value = @value()
+      console.log("Value: #{value}")
+      while (pos < value) and (pos <= @topValue) and (i < numOfIcons-1)
+        pos = pos + steps
+        i++
+      console.log("Icon number: #{i}")
+      return @_getIcon(i)
+    else
+      return ""
 
   _getIcon: (number)->
     return (if @iconClassNames[number]? then @iconClassNames[number] else "")
 
-  _calcActiveIcon: ->
-    if !@iconClassNames? then return
-    if @type is "boolean"
-      @activeIcon = (if @value then @_getIcon(1) else @_getIcon(0))
-    else if @type is "number"
-      numOfIcons = @iconClassNames.length
-      diff = @topValue - @bottomValue
-      steps = diff / (numOfIcons-1)
-      value = @attribute.value
-      pos = @bottomValue
-      i = 0
-      while pos < value and pos <= @topValue and i <= numOfIcons
-        pos += steps
-        i++
-      @activeIcon = @_getIcon(i)
   #
 
   shouldDisplaySparkline: -> 
@@ -198,7 +206,6 @@ class DeviceAttribute
 
   update: (data) -> 
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @_calcActiveIcon()
 
   updateValue: (timestamp, value) ->
     @value(value)
@@ -206,7 +213,6 @@ class DeviceAttribute
     if @history().length is 30
       @history.shift()
     @history.push({t:timestamp, v:value})
-    @_calcActiveIcon()
 
   displayValueText: ->
     value = @value()
