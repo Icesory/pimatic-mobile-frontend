@@ -189,11 +189,11 @@ html body .ui-panel-dismiss {
 }
 
 #index .attribute-icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   display: inline-block;
   position: relative;
-  top: 1px;
+  top: 0.1em;
 }
 
 .ui-mobile .ui-page-theme-a .ui-li-divider {
